@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Housewarming Invitation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <audio id="soundtrack" src="audio/soundtrack.mp3" loop preload="auto"></audio>
+
+  <button type="button" class="music-toggle" id="musicToggle" aria-label="Toggle music" hidden>
+    <svg class="icon-volume" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"></path>
+      <path d="M16 9a5 5 0 0 1 0 6"></path>
+      <path d="M19.364 18.364a9 9 0 0 0 0-12.728"></path>
+    </svg>
+    <svg class="icon-muted" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"></path>
+      <line x1="22" x2="16" y1="9" y2="15"></line>
+      <line x1="16" x2="22" y1="9" y2="15"></line>
+    </svg>
+  </button>
+
+  <canvas id="fireworks" class="fireworks" aria-hidden="true"></canvas>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <div class="envelope-stage" id="envelopeStage">
+    <div class="envelope-ornament envelope-ornament-left"></div>
+    <div class="envelope-ornament envelope-ornament-right"></div>
+    <div class="envelope-wrapper">
+      <div class="envelope-heading">
+        <span>Housewarming Invitation</span>
+        <h2>You're Invited</h2>
+        <p>Open the wax seal to see our housewarming invitation.</p>
+      </div>
+
+      <article class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open housewarming invitation">
+        <div class="envelope-flap"></div>
+        <div class="envelope-glow"></div>
+        <div class="envelope-card" id="card">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sparkle" aria-hidden="true">
+            <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path>
+            <path d="M20 2v4"></path>
+            <path d="M22 4h-4"></path>
+            <circle cx="4" cy="20" r="2"></circle>
+          </svg>
+          <h2>You're Invited</h2>
+          <p class="guest-name">Friends &amp; Family</p>
+          <p class="guest-note">
+            Please join us to celebrate<br />
+            our new home
+          </p>
+          <div class="tiny-rule"></div>
+          <p class="private-note">The invitation awaits inside</p>
+        </div>
+        <div class="gold-seal" id="seal" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+          </svg>
+        </div>
+      </article>
+
+      <p class="tap-hint" id="hint">Tap the wax seal to open</p>
+    </div>
+  </div>
+
+  <main class="invitation" id="invitation" hidden>
+    <section class="hero">
+      <div class="hero-media">
+        <img src="images/house.jpg" alt="Our new home" />
+        <div class="hero-wash"></div>
+        <span class="hero-date-stamp">EST. SEPTEMBER TWENTY SEVENTH • TWO THOUSAND TWENTY SIX</span>
+      </div>
+      <div class="hero-copy">
+        <div class="hero-kicker">
+          <div class="gold-line"></div>
+          <span>A New Chapter Begins</span>
+        </div>
+        <h1>
+          Welcome
+          <br />
+          <span class="amp">Home</span>
+        </h1>
+        <div class="hero-meta">
+          <div class="hero-when">
+            <span class="day">27</span>
+            <div>
+              <span>Sep</span>
+              <span>2026</span>
+            </div>
+          </div>
+          <p>Join us as we open our doors and celebrate the home we now call ours.</p>
+        </div>
+        <div class="scroll-cue" aria-hidden="true">
+          <span>Scroll</span>
+          <div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="countdown">
+      <div class="countdown-grid">
+        <div>
+          <span id="days">00</span>
+          <small>days</small>
+        </div>
+        <div>
+          <span id="hours">00</span>
+          <small>hours</small>
+        </div>
+        <div>
+          <span id="minutes">00</span>
+          <small>minutes</small>
+        </div>
+        <div>
+          <span id="seconds">00</span>
+          <small>seconds</small>
+        </div>
+      </div>
+      <p>Countdown to our housewarming</p>
+    </section>
+
+    <section class="letter">
+      <div class="letter-watermark" aria-hidden="true">27</div>
+      <div class="letter-grid">
+        <div class="letter-copy">
+          <h2>The <br /><em>Invitation</em></h2>
+          <p class="letter-guest">We warmly invite our friends and family</p>
+          <p>“Home is the starting place of love, hope and dreams.”</p>
+          <p>Please join us as we celebrate this new beginning and fill our home with laughter, stories and good company.</p>
+          <div class="letter-hosts">
+            <p>With love</p>
+          </div>
+        </div>
+        <div class="letter-frame">
+          <div class="letter-photo">
+            <img src="images/house.jpg" alt="" />
+          </div>
+          <div class="invite-badge">You are Invited</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="details">
+      <div class="details-head">
+        <div>
+          <span>The Gathering</span>
+          <h2>Event Details</h2>
+        </div>
+        <div class="details-rule"></div>
+        <p>30 Bellavista Crescent</p>
+      </div>
+      <div class="details-grid">
+        <article>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 2v4"></path>
+            <path d="M16 2v4"></path>
+            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+            <path d="M3 10h18"></path>
+          </svg>
+          <h3>The Date</h3>
+          <p>Sunday, Sep 27</p>
+          <small>2026</small>
+        </article>
+        <article>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 6v6l4 2"></path>
+            <circle cx="12" cy="12" r="10"></circle>
+          </svg>
+          <h3>The Occasion</h3>
+          <p>Housewarming</p>
+          <small>Come celebrate with us</small>
+        </article>
+        <article>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <h3>The Venue</h3>
+          <p>Fraser Rise</p>
+          <small>Victoria 3336</small>
+        </article>
+      </div>
+    </section>
+
+    <section class="venue">
+      <div class="venue-grid">
+        <div class="venue-photo">
+          <img src="images/house.jpg" alt="Our new home in Fraser Rise" />
+        </div>
+        <div class="venue-card">
+          <span>Venue Location</span>
+          <h2>Our New Home</h2>
+          <p>30 Bellavista Crescent<br />Fraser Rise, Victoria 3336</p>
+          <div class="venue-meta">
+            <p>Sunday, September 27, 2026</p>
+            <p>Housewarming celebration</p>
+          </div>
+          <a href="https://www.google.com/maps/search/?api=1&amp;query=30+Bellavista+Crescent+Fraser+Rise+3336" target="_blank" rel="noreferrer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Open Live Location
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p class="monogram">Home</p>
+      <p>Housewarming • 2026</p>
+      <div class="footer-icons" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"></path></svg>
+      </div>
+      <p class="credit">Music: Acoustic Breeze by Bensound.com</p>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
