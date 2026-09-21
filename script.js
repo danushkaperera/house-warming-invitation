@@ -211,25 +211,34 @@ function updateProgress() {
   progress.style.transform = `scaleY(${Math.min(1, Math.max(0, ratio))})`;
 }
 
-async function playMusic() {
+function syncMusicButton() {
+  const playing = !soundtrack.paused && !soundtrack.muted;
+  musicToggle.classList.toggle("is-muted", !playing);
+  musicToggle.setAttribute("aria-label", playing ? "Mute music" : "Play music");
+}
+
+function playMusic() {
   if (!musicEnabled) return;
-  try {
-    soundtrack.volume = 0.42;
-    await soundtrack.play();
-    musicToggle.classList.remove("is-muted");
-  } catch (error) {
-    musicToggle.classList.add("is-muted");
+  soundtrack.muted = false;
+  soundtrack.volume = 0.42;
+  const playPromise = soundtrack.play();
+  if (playPromise) {
+    playPromise.then(syncMusicButton).catch(syncMusicButton);
+  } else {
+    syncMusicButton();
   }
 }
 
-function toggleMusic() {
-  musicEnabled = !musicEnabled;
-  if (musicEnabled) {
+function toggleMusic(event) {
+  event.stopPropagation();
+  if (soundtrack.paused || soundtrack.muted) {
+    musicEnabled = true;
     playMusic();
-  } else {
-    soundtrack.pause();
-    musicToggle.classList.add("is-muted");
+    return;
   }
+  musicEnabled = false;
+  soundtrack.pause();
+  syncMusicButton();
 }
 
 function revealInvitation() {
@@ -253,15 +262,35 @@ function openEnvelope() {
   window.setTimeout(revealInvitation, 1400);
 }
 
-envelope.addEventListener("click", openEnvelope);
+function handleEnvelopeGesture() {
+  playMusic();
+  openEnvelope();
+}
+
+envelope.addEventListener("pointerdown", handleEnvelopeGesture);
+envelope.addEventListener("click", handleEnvelopeGesture);
 envelope.addEventListener("keydown", (event) => {
   if (event.key === "Enter" || event.key === " ") {
     event.preventDefault();
-    openEnvelope();
+    handleEnvelopeGesture();
   }
 });
 
 musicToggle.addEventListener("click", toggleMusic);
+soundtrack.addEventListener("playing", syncMusicButton);
+soundtrack.addEventListener("pause", syncMusicButton);
+soundtrack.addEventListener("canplay", () => {
+  if (opened && musicEnabled && soundtrack.paused) playMusic();
+});
+
+window.addEventListener(
+  "pointerdown",
+  (event) => {
+    if (musicToggle.contains(event.target)) return;
+    if (opened && musicEnabled && soundtrack.paused) playMusic();
+  },
+  { passive: true }
+);
 window.addEventListener("scroll", updateProgress, { passive: true });
 
 window.addEventListener(
