@@ -8,7 +8,7 @@ const soundtrack = document.getElementById("soundtrack");
 const musicToggle = document.getElementById("musicToggle");
 const progress = document.getElementById("progress");
 
-const EVENT_DATE = new Date("2026-09-27T11:00:00+10:00");
+const EVENT_DATE = new Date("2026-10-03T11:00:00+10:00");
 const COLORS = ["#f4d27a", "#fff4d8", "#f08a5d", "#e23e3e", "#7ec8e3", "#f7a1c4", "#ffe066"];
 
 let opened = false;
