@@ -15,6 +15,7 @@ let opened = false;
 let touchStartY = 0;
 let fireworksAnimation = 0;
 let musicEnabled = true;
+let fireworksActive = false;
 
 function resizeCanvas() {
   const width = window.innerWidth;
@@ -73,14 +74,25 @@ function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+function isMusicAudible() {
+  return musicEnabled && !soundtrack.paused && !soundtrack.muted;
+}
+
+function shouldLaunchFireworks(startedAt, now) {
+  if (prefersReducedMotion()) return false;
+  if (isMusicAudible()) return true;
+  return now - startedAt < 2500;
+}
+
 function startFireworks() {
-  if (prefersReducedMotion()) return;
+  if (prefersReducedMotion() || fireworksActive) return;
   window.cancelAnimationFrame(fireworksAnimation);
+  fireworksActive = true;
 
   const rockets = [];
   const sparks = [];
   const startedAt = performance.now();
-  const celebrateFor = 8000;
+  let nextLaunchAt = startedAt + 480;
 
   const launch = () => rockets.push(createRocket());
   const boom = (xRatio, yRatio, color) => {
@@ -94,25 +106,21 @@ function startFireworks() {
   boom(0.08, 0.32, COLORS[6]);
   boom(0.92, 0.3, COLORS[4]);
 
-  const timers = [
-    window.setTimeout(launch, 280),
-    window.setTimeout(() => boom(0.12, 0.22, COLORS[4]), 500),
-    window.setTimeout(launch, 700),
-    window.setTimeout(launch, 1100),
-    window.setTimeout(() => boom(0.88, 0.16, COLORS[5]), 1300),
-    window.setTimeout(launch, 1600),
-    window.setTimeout(launch, 2300),
-    window.setTimeout(() => boom(0.1, 0.26, COLORS[1]), 2500),
-    window.setTimeout(launch, 3100),
-    window.setTimeout(() => boom(0.9, 0.24, COLORS[3]), 3600),
-    window.setTimeout(launch, 4200),
-    window.setTimeout(launch, 5400),
-  ];
-
   function tick(now) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.globalCompositeOperation = "lighter";
     ctx.lineCap = "round";
+
+    if (shouldLaunchFireworks(startedAt, now) && now >= nextLaunchAt) {
+      launch();
+      if (Math.random() > 0.42) {
+        boom(random(0.06, 0.24), random(0.1, 0.34), COLORS[Math.floor(Math.random() * COLORS.length)]);
+      }
+      if (Math.random() > 0.55) {
+        boom(random(0.76, 0.95), random(0.1, 0.34), COLORS[Math.floor(Math.random() * COLORS.length)]);
+      }
+      nextLaunchAt = now + random(520, 980);
+    }
 
     for (let i = rockets.length - 1; i >= 0; i -= 1) {
       const rocket = rockets[i];
@@ -171,11 +179,11 @@ function startFireworks() {
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
 
-    if (now - startedAt < celebrateFor || rockets.length || sparks.length) {
+    if (shouldLaunchFireworks(startedAt, now) || rockets.length || sparks.length) {
       fireworksAnimation = window.requestAnimationFrame(tick);
     } else {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      timers.forEach((id) => window.clearTimeout(id));
+      fireworksActive = false;
     }
   }
 
@@ -277,8 +285,12 @@ envelope.addEventListener("keydown", (event) => {
 });
 
 musicToggle.addEventListener("click", toggleMusic);
-soundtrack.addEventListener("playing", syncMusicButton);
+soundtrack.addEventListener("playing", () => {
+  syncMusicButton();
+  if (opened) startFireworks();
+});
 soundtrack.addEventListener("pause", syncMusicButton);
+soundtrack.addEventListener("ended", syncMusicButton);
 soundtrack.addEventListener("canplay", () => {
   if (opened && musicEnabled && soundtrack.paused) playMusic();
 });
