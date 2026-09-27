@@ -16,6 +16,7 @@ let touchStartY = 0;
 let fireworksAnimation = 0;
 let musicEnabled = true;
 let fireworksActive = false;
+let celebrationEnded = false;
 
 function resizeCanvas() {
   const width = window.innerWidth;
@@ -79,13 +80,13 @@ function isMusicAudible() {
 }
 
 function shouldLaunchFireworks(startedAt, now) {
-  if (prefersReducedMotion()) return false;
+  if (prefersReducedMotion() || celebrationEnded) return false;
   if (isMusicAudible()) return true;
   return now - startedAt < 2500;
 }
 
 function startFireworks() {
-  if (prefersReducedMotion() || fireworksActive) return;
+  if (prefersReducedMotion() || fireworksActive || celebrationEnded) return;
   window.cancelAnimationFrame(fireworksAnimation);
   fireworksActive = true;
 
@@ -213,10 +214,25 @@ function startCountdown() {
   window.setInterval(updateCountdown, 1000);
 }
 
+function isAtBottom() {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  if (max <= 80) return false;
+  return window.scrollY + 48 >= max;
+}
+
+function stopCelebration() {
+  if (celebrationEnded) return;
+  celebrationEnded = true;
+  musicEnabled = false;
+  soundtrack.pause();
+  syncMusicButton();
+}
+
 function updateProgress() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
   const ratio = max > 0 ? window.scrollY / max : 0;
   progress.style.transform = `scaleY(${Math.min(1, Math.max(0, ratio))})`;
+  if (opened && isAtBottom()) stopCelebration();
 }
 
 function syncMusicButton() {
@@ -226,7 +242,7 @@ function syncMusicButton() {
 }
 
 function playMusic() {
-  if (!musicEnabled) return;
+  if (!musicEnabled || celebrationEnded) return;
   soundtrack.muted = false;
   soundtrack.volume = 0.42;
   const playPromise = soundtrack.play();
@@ -240,6 +256,7 @@ function playMusic() {
 function toggleMusic(event) {
   event.stopPropagation();
   if (soundtrack.paused || soundtrack.muted) {
+    celebrationEnded = false;
     musicEnabled = true;
     playMusic();
     return;
@@ -287,19 +304,19 @@ envelope.addEventListener("keydown", (event) => {
 musicToggle.addEventListener("click", toggleMusic);
 soundtrack.addEventListener("playing", () => {
   syncMusicButton();
-  if (opened) startFireworks();
+  if (opened && !celebrationEnded) startFireworks();
 });
 soundtrack.addEventListener("pause", syncMusicButton);
 soundtrack.addEventListener("ended", syncMusicButton);
 soundtrack.addEventListener("canplay", () => {
-  if (opened && musicEnabled && soundtrack.paused) playMusic();
+  if (opened && musicEnabled && !celebrationEnded && soundtrack.paused) playMusic();
 });
 
 window.addEventListener(
   "pointerdown",
   (event) => {
     if (musicToggle.contains(event.target)) return;
-    if (opened && musicEnabled && soundtrack.paused) playMusic();
+    if (opened && musicEnabled && !celebrationEnded && soundtrack.paused) playMusic();
   },
   { passive: true }
 );
